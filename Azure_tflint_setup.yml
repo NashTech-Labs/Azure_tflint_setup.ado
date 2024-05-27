@@ -1,1 +1,27 @@
+parameters:
+- name: 'workingDirectory'
+  type: string    
+  default: '$(System.DefaultWorkingDirectory)'
 
+steps:
+
+- script:
+    curl https://raw.githubusercontent.com/terraform-linters/tflint/master/install_linux.sh | bash
+    tflint -v
+  displayName: "Install Linux TFLint"
+  name: "InstallTFLintonLinux"
+  condition: eq(variables['Agent.OS'], 'Linux')
+
+- script: |
+   
+    echo "---------------------------------------Downloading-----------------------------------------------"
+    curl https://github.com/terraform-linters/tflint/releases/download/v0.42.0/tflint_windows_386.zip -o ${{ parameters.workingDirectory}}/tflint.zip
+    echo "-----------------------------UnZIPPING--------------------------------------------------------"
+    gzip -dkc ${{ parameters.workingDirectory}}/tflint.zip > ${{ parameters.workingDirectory}}/tflint.exe
+    echo "--------------------------------------Removing not required file------------------------------------"
+    rm -f ${{ parameters.workingDirectory}}/tflint.zip
+    tflint.exe -v 
+  displayName: "Install Windows TFLint"
+  name: "InstallTFLintonWindows"
+  condition: eq(variables['Agent.OS'], 'Windows_NT')
+  
